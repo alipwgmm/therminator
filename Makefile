@@ -76,6 +76,11 @@ BIN_HBTFIT  = therm2_hbtfit
 HSRC_HBTFIT = Parser.cxx Configurator.cxx ParticleDB.cxx ParticleType.cxx DecayTable.cxx DecayChannel.cxx
 SRC_HBTFIT  = $(HSRC_HBTFIT:%=$(DIR_CXX)%) $(BIN_HBTFIT:%=$(DIR_CXX)%.cxx)
 OBJ_HBTFIT  = $(SRC_HBTFIT:$(DIR_CXX)%.cxx=$(DIR_OBJ)%.o)
+# parser
+BIN_PARSER  = therm2_parser
+HSRC_PARSER = Therminator2ToHepMCParser.cxx
+SRC_PARSER  = $(HSRC_PARSER:%=$(DIR_CXX)%) $(BIN_PARSER:%=$(DIR_CXX)%.cxx)
+OBJ_PARSER  = $(SRC_PARSER:$(DIR_CXX)%.cxx=$(DIR_OBJ)%.o)
 
 # preprocessor
 PREPROCESS  = -D_CXX_VER_="\"$(shell $(CXX) --version | grep $(CXX))\"" -D_ROOT_VER_="\"$(shell root-config --version)\""
@@ -106,7 +111,7 @@ LFLAGS      =  -lgcc -g `root-config --libs` -lm
 #################################################################################
 # RULES                                                                         #
 #################################################################################
-all: $(BIN_EVENTS:%=$(DIR_OBJ)%) $(BIN_FEMTO:%=$(DIR_OBJ)%) $(BIN_HBTFIT:%=$(DIR_OBJ)%)
+all: $(BIN_EVENTS:%=$(DIR_OBJ)%) $(BIN_FEMTO:%=$(DIR_OBJ)%) $(BIN_HBTFIT:%=$(DIR_OBJ)%) $(BIN_PARSER:%=$(DIR_OBJ)%)
 	cp $^ $(DIR_MAIN)
 	echo
 	echo "Type \"./therm2_events\" to generate events,"
@@ -125,6 +130,10 @@ $(DIR_OBJ)therm2_femto: $(OBJ_FEMTO)
 $(DIR_OBJ)therm2_hbtfit: $(OBJ_HBTFIT)
 	echo "Linking:   $@ ($(LD))"
 	$(LD)  $^ -o $@ $(LFLAGS)
+
+$(DIR_OBJ)therm2_parser: $(SRC_PARSER)
+	echo "Building: $< ($(CXX))"
+	$(CXX) $(CXXFLAGS) -I$(HEPMC_ROOT)/include -std=c++11 -o $@ $^ -L$(HEPMC_ROOT)/lib -lHepMC 
 
 $(DIR_OBJ)%.o: %.cxx
 	@[ -d $(DIR_OBJ) ] || mkdir -p $(DIR_OBJ)
